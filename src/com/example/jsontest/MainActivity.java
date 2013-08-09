@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 		
 		mCount = 0;	
 		mOffset = 0;
-		mLimit = 15;
+		mLimit = 40;
 		mProgressBar= (ProgressBar) findViewById( R.id.progressBar);
 		mProgressBar.setMax(29);
 		 
@@ -98,23 +98,49 @@ public class MainActivity extends Activity {
 				 }
 
 				private void isScrollCompleted() {
-				    if (currentVisibleItemCount > 0 && currentScrollState == SCROLL_STATE_IDLE) {
+				    if (currentVisibleItemCount > 0 ) { //& currentScrollState == SCROLL_STATE_IDLE) {
 				        /*** In this way I detect if there's been a scroll which has completed ***/
 				        /*** do the work! ***/
 				    	int loadThreshold =   (currentTotalListViewCount - currentVisibleItemCount);
+				    	int visibleOffset  = (currentVisibleItemCount / 2);
+				    	
 				    	Log.i(TAG,"currentFirstVisibleItem ("+String.valueOf(currentFirstVisibleItem)+") == "+String.valueOf(loadThreshold)+" ("+String.valueOf(currentTotalListViewCount)+"-"+String.valueOf(currentVisibleItemCount)+")");
-					    
-				    	if(currentFirstVisibleItem == loadThreshold) {
+				    	Log.i(TAG,"mOffset: "+String.valueOf(mOffset));
+				    	if(currentFirstVisibleItem == 0 && mOffset>0) {
 					    	int offset = currentFirstVisibleItem+currentVisibleItemCount;
 					    	int limit = currentVisibleItemCount+20;
+					    	
+					    	
+					    	
+					    	mOffset = (mOffset ) - currentVisibleItemCount;
+					    	if(mOffset<0)
+					    		mOffset = 0;
 					    	
 					    	Log.i(TAG,"Load Cursor Limit "+String.valueOf(mOffset)+", "+String.valueOf(mLimit));
 					    	Cursor cursor = dbHelper.fetchItemsByOffsetLimit(mOffset, mLimit);
 			    	 		mItemCursorAdapter.updateCursor(cursor);
 			    	 		mDataBaseCount = dbHelper.getCount();
-			    	 		mListView.setSelection(0);
-			    	 		mOffset = (mOffset)+mLimit;
+			    	 		mListView.setSelection(currentVisibleItemCount);
+			    	 		
+			    	 		//mListView.s
+			    	 		//mOffset = (mOffset) + mLimit;
+				    		
+				    	}
+				    	if(currentFirstVisibleItem == loadThreshold) {
+					    	int offset = currentFirstVisibleItem+currentVisibleItemCount;
+					    	int limit = currentVisibleItemCount+20;
 					    	
+					    	mOffset = (mOffset - visibleOffset) + mLimit;
+					    	
+					    	if(mOffset>mDataBaseCount - mLimit)
+					    		mOffset = mDataBaseCount - mLimit;
+					    						    	
+					    	Log.i(TAG,"Load Cursor Limit "+String.valueOf(mOffset)+", "+String.valueOf(mLimit));
+					    	Cursor cursor = dbHelper.fetchItemsByOffsetLimit(mOffset, mLimit);
+			    	 		mItemCursorAdapter.updateCursor(cursor);
+			    	 		mDataBaseCount = dbHelper.getCount();
+			    	 		//mListView.smoothScrollToPosition(visibleOffset);
+			    	 		mListView.setSelection(visibleOffset);
 					    }
 
 				    }
@@ -192,7 +218,7 @@ public class MainActivity extends Activity {
 		        	Cursor cursor = dbHelper.fetchItemsByOffsetLimit(mOffset, mLimit);
 	    	 		mItemCursorAdapter.updateCursor(cursor);
 	    	 		mDataBaseCount = dbHelper.getCount();
-	    	 		mOffset = mLimit;
+	    	 		//mOffset = mLimit;
 		        	MainActivity.this.setTitle("# items:" + String.valueOf(mDataBaseCount) + ","+result );
 	         }
 

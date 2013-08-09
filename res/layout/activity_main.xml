@@ -24,7 +24,7 @@
         android:id="@+id/listView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/progressBar1"
+        android:layout_above="@+id/progressBar"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/editFilterText" >
 
