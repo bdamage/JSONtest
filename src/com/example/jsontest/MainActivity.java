@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
+	final static String TAG = "JSONtest";
 	private ItemsDbAdapter dbHelper;
 	ItemListAdapter mItemListAdapter;
 	ItemsCursorAdapter mItemCursorAdapter;
@@ -45,7 +46,11 @@ public class MainActivity extends Activity {
 	int currentFirstVisibleItem;
 	int currentVisibleItemCount;
 	int currentScrollState;
+	int currentTotalListViewCount;
 	int mDataBaseCount;
+	int mLimit;
+	int mOffset;
+	ListView mListView;
 	
 	int mCount;
 	@Override
@@ -54,14 +59,18 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		showToast("v1.00 - Refreshing data");
 		
-		mCount = 0;		
+		mCount = 0;	
+		mOffset = 0;
+		mLimit = 15;
 		mProgressBar= (ProgressBar) findViewById( R.id.progressBar);
 		mProgressBar.setMax(29);
 		 
 		dbHelper = new ItemsDbAdapter(this);
 		dbHelper.open();
 		dbHelper.deleteAllItems();
+		mListView = (ListView) findViewById(R.id.listView1);
 		//dbHelper.insertSomeData();
+		
 		initListView();
 		RefreshList();
 	}
@@ -71,16 +80,16 @@ public class MainActivity extends Activity {
 		 Cursor cursor = dbHelper.fetchAllItems();
 		 	  
 		  mItemCursorAdapter = new ItemsCursorAdapter(this,cursor,true);
+		    
 		  
-		  ListView listView = (ListView) findViewById(R.id.listView1);
-		  // Assign adapter to ListView
+		  mListView.setAdapter(mItemCursorAdapter);
 		  
-		  listView.setAdapter(mItemCursorAdapter);
-		  
-		  listView.setOnScrollListener(new OnScrollListener(){
+		  mListView.setOnScrollListener(new OnScrollListener(){
 			  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 				    currentFirstVisibleItem = firstVisibleItem;
 				    currentVisibleItemCount = visibleItemCount;
+				    currentTotalListViewCount = totalItemCount;
+				   				    	
 				}
 
 				public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -92,6 +101,22 @@ public class MainActivity extends Activity {
 				    if (currentVisibleItemCount > 0 && currentScrollState == SCROLL_STATE_IDLE) {
 				        /*** In this way I detect if there's been a scroll which has completed ***/
 				        /*** do the work! ***/
+				    	int loadThreshold =   (currentTotalListViewCount - currentVisibleItemCount);
+				    	Log.i(TAG,"currentFirstVisibleItem ("+String.valueOf(currentFirstVisibleItem)+") == "+String.valueOf(loadThreshold)+" ("+String.valueOf(currentTotalListViewCount)+"-"+String.valueOf(currentVisibleItemCount)+")");
+					    
+				    	if(currentFirstVisibleItem == loadThreshold) {
+					    	int offset = currentFirstVisibleItem+currentVisibleItemCount;
+					    	int limit = currentVisibleItemCount+20;
+					    	
+					    	Log.i(TAG,"Load Cursor Limit "+String.valueOf(mOffset)+", "+String.valueOf(mLimit));
+					    	Cursor cursor = dbHelper.fetchItemsByOffsetLimit(mOffset, mLimit);
+			    	 		mItemCursorAdapter.updateCursor(cursor);
+			    	 		mDataBaseCount = dbHelper.getCount();
+			    	 		mListView.setSelection(0);
+			    	 		mOffset = (mOffset)+mLimit;
+					    	
+					    }
+
 				    }
 				}
   
@@ -163,9 +188,12 @@ public class MainActivity extends Activity {
 	        	 	//mItemCursorAdapter.notifyDataSetChanged();
 	        	 /*	int count = mItemListAdapter.getCount();
 	        	 */
-		        	Cursor cursor = dbHelper.fetchAllItems();		        	
+		        	//Cursor cursor = dbHelper.fetchAllItems();
+		        	Cursor cursor = dbHelper.fetchItemsByOffsetLimit(mOffset, mLimit);
 	    	 		mItemCursorAdapter.updateCursor(cursor);
-		        	MainActivity.this.setTitle("# items:" + String.valueOf(dbHelper.getCount()) + ","+result );
+	    	 		mDataBaseCount = dbHelper.getCount();
+	    	 		mOffset = mLimit;
+		        	MainActivity.this.setTitle("# items:" + String.valueOf(mDataBaseCount) + ","+result );
 	         }
 
 	         @Override
@@ -202,9 +230,9 @@ public class MainActivity extends Activity {
     	
     		//jp.getJSONfileCompressedFromURL("http://www.mina-viner.se/json-samples/sample300.php");
     		mCount = 0;
-    		while(mCount<3) {            		
+    		while(mCount<2) {            		
             		 startTime = SystemClock.elapsedRealtime();  
-            		jobj = jp.jObjDownloadAndDecompress("http://www.mina-viner.se/json-samples/sample1000.php");
+            		jobj = jp.jObjDownloadAndDecompress("http://www.mina-viner.se/json-samples/sample300.php");
             		//jobj = jp.getJSONfileFromURL("http://www.mina-viner.se/json-samples/sample1000.json");
             		endTime = SystemClock.elapsedRealtime();
             		

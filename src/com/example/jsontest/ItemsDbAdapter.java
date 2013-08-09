@@ -126,6 +126,7 @@ public class ItemsDbAdapter  {
 		  }
 		  return mCursor;		 
 	}
+	
 	public int getCount()
 	{
 		String query = "SELECT COUNT(*) FROM "+SQLITE_TABLE;
@@ -134,9 +135,23 @@ public class ItemsDbAdapter  {
 		mCount = c.getInt(0);
 		return mCount;
 	}
+	
+	public Cursor fetchItemsByOffsetLimit(int offset, int limit) {
+		
+		String sLimit = String.valueOf(offset) +", "+String.valueOf(limit);
+		
+		Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID, KEY_CODE, KEY_NAME, KEY_PRICE}, null, null ,null, null, null,sLimit);
+		
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+			mCount = mCursor.getCount();
+		}
+		
+		return mCursor;		
+	}
 	public Cursor fetchAllItems() {
 			
-		Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID, KEY_CODE, KEY_NAME, KEY_PRICE}, null, null ,null, null, null,"69, 10");
+		Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID, KEY_CODE, KEY_NAME, KEY_PRICE}, null, null ,null, null, null);
 		
 		if (mCursor != null) {
 			mCursor.moveToFirst();
@@ -165,7 +180,7 @@ public class ItemsDbAdapter  {
 
 		mDb.beginTransaction();
 		try{
-			for(int i=0;i<1000;i++){
+			for(int i=0;i<1000;i++) {
 				String code = "C" + i;
 				String name = "name [" + i + "]";
 				String price = (r.nextFloat()*100)+" Kr";
