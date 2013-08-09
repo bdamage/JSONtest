@@ -105,7 +105,7 @@ public class ItemsDbAdapter  {
 		Log.w(TAG,"Deleted items #" + Integer.toString(doneDelete));
 		return  doneDelete > 0;				
 	}
-	
+	 
 	public Cursor fetchItemsByBarcode(String inputText) throws SQLException {
 		  Log.w(TAG, inputText);
 		  Cursor mCursor = null;
@@ -128,11 +128,16 @@ public class ItemsDbAdapter  {
 	}
 	public int getCount()
 	{
+		String query = "SELECT COUNT(*) FROM "+SQLITE_TABLE;
+		Cursor c = mDb.rawQuery(query,null);
+		c.moveToFirst();
+		mCount = c.getInt(0);
 		return mCount;
 	}
 	public Cursor fetchAllItems() {
 			
-		Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID, KEY_CODE, KEY_NAME, KEY_PRICE}, null, null ,null, null, null,"5000");
+		Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID, KEY_CODE, KEY_NAME, KEY_PRICE}, null, null ,null, null, null,"69, 10");
+		
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 			mCount = mCursor.getCount();

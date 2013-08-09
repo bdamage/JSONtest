@@ -27,6 +27,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
@@ -37,20 +39,22 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
 	private ItemsDbAdapter dbHelper;
-	//private SimpleCursorAdapter dataAdapter;
-	
 	ItemListAdapter mItemListAdapter;
 	ItemsCursorAdapter mItemCursorAdapter;
 	ProgressBar mProgressBar;
-	 
+	int currentFirstVisibleItem;
+	int currentVisibleItemCount;
+	int currentScrollState;
+	int mDataBaseCount;
+	
 	int mCount;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		showToast("v1.00 - Refreshing data");
-		mCount = 0;
 		
+		mCount = 0;		
 		mProgressBar= (ProgressBar) findViewById( R.id.progressBar);
 		mProgressBar.setMax(29);
 		 
@@ -65,37 +69,34 @@ public class MainActivity extends Activity {
 	public void initListView()
 	{	
 		 Cursor cursor = dbHelper.fetchAllItems();
-		 
-		/*  // The desired columns to be bound
-		  String[] columns = new String[] {
-		    ItemsDbAdapter.KEY_CODE,
-		    ItemsDbAdapter.KEY_NAME,
-		    ItemsDbAdapter.KEY_PRICE,		    
-		  };
-		 
-		  // the XML defined views which the data will be bound to
-		  int[] to = new int[] { 
-		    R.id.barcode,
-		    R.id.name,
-		    R.id.price,
-		  };
-		 
-		  // create the adapter using the cursor pointing to the desired data 
-		  //as well as the layout information
-		  dataAdapter = new SimpleCursorAdapter(
-		    this, R.layout.list_item, 
-		    cursor, 
-		    columns, 
-		    to,
-		    0);
-		    */
-		  
+		 	  
 		  mItemCursorAdapter = new ItemsCursorAdapter(this,cursor,true);
 		  
 		  ListView listView = (ListView) findViewById(R.id.listView1);
 		  // Assign adapter to ListView
 		  
 		  listView.setAdapter(mItemCursorAdapter);
+		  
+		  listView.setOnScrollListener(new OnScrollListener(){
+			  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				    currentFirstVisibleItem = firstVisibleItem;
+				    currentVisibleItemCount = visibleItemCount;
+				}
+
+				public void onScrollStateChanged(AbsListView view, int scrollState) {
+				    currentScrollState = scrollState;
+				    isScrollCompleted();
+				 }
+
+				private void isScrollCompleted() {
+				    if (currentVisibleItemCount > 0 && currentScrollState == SCROLL_STATE_IDLE) {
+				        /*** In this way I detect if there's been a scroll which has completed ***/
+				        /*** do the work! ***/
+				    }
+				}
+  
+		  });
+		  
 		  this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		  
 		  EditText myFilter = (EditText) findViewById(R.id.editFilterText);
@@ -114,8 +115,9 @@ public class MainActivity extends Activity {
 		 
 		  mItemCursorAdapter.setFilterQueryProvider(new FilterQueryProvider(){
 			  public Cursor runQuery(CharSequence constraint) {
-				  mItemCursorAdapter.mCursor = dbHelper.fetchItemsByBarcode(constraint.toString()); 
-				 return mItemCursorAdapter.mCursor;
+				  return dbHelper.fetchItemsByBarcode(constraint.toString()); 
+				 // mItemCursorAdapter.mCursor = dbHelper.fetchItemsByBarcode(constraint.toString()); 
+				// return mItemCursorAdapter.mCursor;
 			  }
 		  });
 		 
@@ -135,10 +137,8 @@ public class MainActivity extends Activity {
 	    switch (item.getItemId()) {
 	    	case R.id.action_refresh:
 	    		RefreshList();
-        	 //	mItemCursorAdapter.notifyDataSetChanged();
 	    		return true;
 	        case R.id.action_settings:
-	        	
 	            return true;	        
 	        default:
 	            return super.onOptionsItemSelected(item);
@@ -163,8 +163,7 @@ public class MainActivity extends Activity {
 	        	 	//mItemCursorAdapter.notifyDataSetChanged();
 	        	 /*	int count = mItemListAdapter.getCount();
 	        	 */
-		        	Cursor cursor = dbHelper.fetchAllItems();
-		        	
+		        	Cursor cursor = dbHelper.fetchAllItems();		        	
 	    	 		mItemCursorAdapter.updateCursor(cursor);
 		        	MainActivity.this.setTitle("# items:" + String.valueOf(dbHelper.getCount()) + ","+result );
 	         }
@@ -175,7 +174,6 @@ public class MainActivity extends Activity {
 
 	         @Override
 	         protected void onProgressUpdate(Integer... values) {	   
-	        //	MainActivity.this.mProgressBar= (ProgressBar) findViewById( R.id.progressBar);
 	        	MainActivity.this.mProgressBar.setProgress( (Integer)values[0]);
 	         }
 		};
@@ -204,7 +202,7 @@ public class MainActivity extends Activity {
     	
     		//jp.getJSONfileCompressedFromURL("http://www.mina-viner.se/json-samples/sample300.php");
     		mCount = 0;
-    		while(mCount<30) {            		
+    		while(mCount<3) {            		
             		 startTime = SystemClock.elapsedRealtime();  
             		jobj = jp.jObjDownloadAndDecompress("http://www.mina-viner.se/json-samples/sample1000.php");
             		//jobj = jp.getJSONfileFromURL("http://www.mina-viner.se/json-samples/sample1000.json");

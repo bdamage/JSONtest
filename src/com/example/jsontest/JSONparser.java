@@ -42,59 +42,8 @@ public class JSONparser {
 		
 	}
 	
-	
-	public static String decompress(String zipText) throws IOException {
-	    byte[] compressed = Base64.decode(zipText, Base64.DEFAULT);
-	    if (compressed.length > 4)
-	    {
-	        GZIPInputStream gzipInputStream = new GZIPInputStream(
-	                new ByteArrayInputStream(compressed, 4,
-	                        compressed.length - 4));
-
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	        for (int value = 0; value != -1;) {
-	            value = gzipInputStream.read();
-	            if (value != -1) {
-	                baos.write(value);
-	            }
-	        }
-	        gzipInputStream.close();
-	        baos.close();
-	        String sReturn = new String(baos.toByteArray(), "UTF-8");
-	        return sReturn;
-	    }
-	    else
-	    {
-	        return "";
-	    }
-	}
-	
-	public static byte[] compress(String string) throws IOException {
-	    ByteArrayOutputStream os = new ByteArrayOutputStream(string.length());
-	    GZIPOutputStream gos = new GZIPOutputStream(os);
-	    gos.write(string.getBytes());
-	    gos.close();
-	    byte[] compressed = os.toByteArray();
-	    os.close();
-	    return compressed;
-	}
-
-	public static String decompress(byte[] compressed) throws IOException {
-	    final int BUFFER_SIZE = 32;
-	    ByteArrayInputStream is = new ByteArrayInputStream(compressed);
-	    GZIPInputStream gis = new GZIPInputStream(is, BUFFER_SIZE);
-	    StringBuilder string = new StringBuilder();
-	    byte[] data = new byte[BUFFER_SIZE];
-	    int bytesRead;
-	    while ((bytesRead = gis.read(data)) != -1) {
-	        string.append(new String(data, 0, bytesRead));
-	    }
-	    gis.close();
-	    is.close();
-	    return string.toString();
-	}
-	
-	String downloadAndDecompress(String sUrl) {
+	String downloadAndDecompress(String sUrl) 
+	{
 		StringBuilder string = new StringBuilder();
 		try {
 				URL url = new URL(sUrl);
@@ -108,27 +57,7 @@ public class JSONparser {
 				while ((bytesRead = stream.read(data)) != -1) {
 				        string.append(new String(data, 0, bytesRead));
 				}
-			
-				 
-			/*	InputSource is = new InputSource(stream);
-				InputStream input = new BufferedInputStream(is.getByteStream());
-				
-				OutputStream output = new FileOutputStream("/sdcard/test.json");
-				byte data[] = new byte[2097152];
-				
-				long total = 0;
-
-				int count;
-				
-				while ((count = input.read(data)) != -1) {
-					total += count;
-					output.write(data, 0, count);
-				}	*/
-				 
-				//output.flush();
-				//output.close();
-				//input.close();
-				
+							
 			} catch (BufferOverflowException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -137,7 +66,9 @@ public class JSONparser {
 			}
 		 return string.toString();
 	}
-	public JSONObject jObjDownloadAndDecompress(String sUrl) {
+	
+	public JSONObject jObjDownloadAndDecompress(String sUrl) 
+	{
 		StringBuilder string = new StringBuilder();
 		try {
 				URL url = new URL(sUrl);
@@ -167,40 +98,7 @@ public class JSONparser {
  
 		 return jObj;
 	}
-	public JSONObject getJSONfileCompressedFromURL(String url)
-	{
-		   try {
-	            // defaultHttpClient
-	            DefaultHttpClient httpClient = new DefaultHttpClient();
-	           
-	            HttpPost httpPost = new HttpPost(url);
-	 
-	            HttpResponse httpResponse = httpClient.execute(httpPost);
-	            HttpEntity httpEntity = httpResponse.getEntity();
-	            
-	           String response = EntityUtils.toString(httpEntity);
-	            json = decompress(response);
 
-	            
-	        } catch (UnsupportedEncodingException e) {
-	            e.printStackTrace();
-	        } catch (ClientProtocolException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-		   
-		   // try parse the string to a JSON object
-	        try {
-	            jObj = new JSONObject(json);
-	        } catch (JSONException e) {
-	            Log.e("JSON Parser", ">> Error parsing data " + e.toString());
-	        }
-	 
-	            
-		return jObj;
-		
-	}
 	
 	public JSONObject getJSONfileFromURL(String url)
 	{
@@ -211,11 +109,8 @@ public class JSONparser {
 	 
 	            HttpResponse httpResponse = httpClient.execute(httpPost);
 	            HttpEntity httpEntity = httpResponse.getEntity();
-	            
-	           
-	            json = EntityUtils.toString(httpEntity);
-
-	            
+	            	           
+	            json = EntityUtils.toString(httpEntity);	            
 	        } catch (UnsupportedEncodingException e) {
 	            e.printStackTrace();
 	        } catch (ClientProtocolException e) {
@@ -230,8 +125,7 @@ public class JSONparser {
 	        } catch (JSONException e) {
 	            Log.e("JSON Parser", ">> Error parsing data " + e.toString());
 	        }
-	 
-	            
+	 	            
 		return jObj;
 		
 	}

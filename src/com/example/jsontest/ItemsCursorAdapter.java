@@ -14,7 +14,7 @@ public class ItemsCursorAdapter extends CursorAdapter {
 	
 	 private final Context mCtx;
 	 private final LayoutInflater mInflater;
-	Cursor mCursor;
+	//Cursor mCursor;
 	static class ViewHolder {
 		TextView name,id,price;
 		TextView type,stock;
@@ -23,7 +23,7 @@ public class ItemsCursorAdapter extends CursorAdapter {
 	public ItemsCursorAdapter(Context context, Cursor c, boolean autoRequery)
 	{			
 		super(context, c, autoRequery);
-		this.mCursor = c;
+	//	this.mCursor = c;
 		//this.mItems = objects;
 		this.mCtx = context;
 		//this.notifyDataSetChanged();
@@ -33,7 +33,7 @@ public class ItemsCursorAdapter extends CursorAdapter {
 	
 	public void updateCursor(Cursor c)
 	{
-		this.mCursor = c;
+		//this.mCursor = c;
 		this.changeCursor(c);
 		this.notifyDataSetChanged();
 	}
@@ -43,7 +43,7 @@ public class ItemsCursorAdapter extends CursorAdapter {
 		View v =  mInflater.inflate(R.layout.list_item, parent, false);    	
         return v;
     }
- 
+	
     @Override
     public void bindView(View v, Context context, Cursor c) {
  
@@ -65,8 +65,8 @@ public class ItemsCursorAdapter extends CursorAdapter {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		
-	    mCursor.moveToPosition(position);
+		Cursor mCursor = this.getCursor();  //should maybe cache this?
+		mCursor.moveToPosition(position);
 		
 		holder.name.setText((String) mCursor.getString( mCursor.getColumnIndexOrThrow("name")));
 		holder.id.setText((String) mCursor.getString( mCursor.getColumnIndexOrThrow("barcode")));
